@@ -111,9 +111,9 @@ vec_bytes CCPackage::createResponse(ValidatorCommands type)
     buffer.push_back(0x06);
 
     // Байт 4: Данные ответа
-    if(type == ValidatorCommands::ACK)
+    if(type == ValidatorCommands::Ack)
         buffer.push_back(0x00);
-    else if(type == ValidatorCommands::NAK)
+    else if(type == ValidatorCommands::Nak)
         buffer.push_back(0xFF);
 
     vec_bytes CRC = this->GetCRC16(buffer, buffer.size());

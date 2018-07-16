@@ -13,6 +13,7 @@
 #include "cashcodeerrors.h"
 #include "ccpackage.h"
 
+
 class CashCodeProtocol
 {
 private:
@@ -26,6 +27,7 @@ private:
     bool m_ReturnBill;
     SerialPort *ComPort;
     CCPackage Pack;
+    boost::thread* m_thread;
 
     // Time-out ожидания ответа от считывателя
     const int POLL_TIMEOUT = 200;
@@ -42,6 +44,7 @@ private:
 
 public:
     CashCodeProtocol();
+    ~CashCodeProtocol();
     enum class BillRecievedStatus { Accepted, Rejected };
     enum class BillCassetteStatus { Inplace, Removed };
 

@@ -14,12 +14,18 @@ HEADERS += cashcodeprotocol.h \
     ccpackage.h \
     commands.h
 
-INCLUDEPATH += H:\Libs\boost_1_62_0
-LIBS += -lws2_32
-LIBS += -LH:\Libs\bin \
-        -lboost_system-mgw53-1_62 \
-        -lboost_thread-mgw53-mt-1_62 \
-        -lboost_chrono-mgw53-1_62
-
+windows: {
+    INCLUDEPATH += H:\Libs\boost_1_62_0
+    LIBS += -lws2_32
+    LIBS += -LH:\Libs\bin \
+            -lboost_system-mgw53-1_62 \
+            -lboost_thread-mgw53-mt-1_62 \
+            -lboost_chrono-mgw53-1_62
+} else {
+    LIBS += \
+            -lboost_system \
+            -lboost_thread \
+            -lboost_chrono
+}
 
 

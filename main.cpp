@@ -7,33 +7,30 @@
 
 using namespace std;
 
-int main(int argc, char *argv[])
+int main(int /*argc*/, char */*argv*/[])
 {
+
     CashCodeProtocol CCValidator;
     CCValidator.ConnectValidator();
     CCValidator.PowerUpValidator();
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    bool is_thread = false;
-
     for(int i = 0; i < 5; i++)
     {
         cout << "-----------[ TRY " << i << " ]------------\n";
         CCValidator.EnableSequence();
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        CCValidator.StartListening();
 
-        if( ! is_thread) {
-            CCValidator.StartListening();
-            is_thread = true;
-        }
 
+        std::this_thread::sleep_for(std::chrono::seconds(60));
         cout << "Total Cash: " << dec << CCValidator.m_CashReceived << endl;
 
-        std::this_thread::sleep_for(std::chrono::seconds(35));
-
+        CCValidator.StopListening();
         CCValidator.DisableSequence();
         std::this_thread::sleep_for(std::chrono::seconds(10));
     }
+
     cout << "Done\n";
 
     return 0;

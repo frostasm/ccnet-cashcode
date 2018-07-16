@@ -37,7 +37,7 @@ public:
     int m_BaudRate;
 
     SerialPort(size_t timeout);
-    ~SerialPort(void);
+    virtual ~SerialPort();
 
     virtual bool start(const char *com_port_name, int baud_rate = 9600);
     virtual void stop();

@@ -24,7 +24,7 @@ SerialPort::SerialPort(size_t timeout) :
     timeout(timeout),
     read_error(true) {}
 
-SerialPort::~SerialPort(void)
+SerialPort::~SerialPort()
 {
     stop();
 }
@@ -123,5 +123,6 @@ int SerialPort::write_data(vec_bytes buf)
         return 0;
     boost::system::error_code error_code;
     this->p_port->write_some(boost::asio::buffer(buf, buf.size()), error_code);
+    return error_code.value();
 }
 
