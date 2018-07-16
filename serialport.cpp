@@ -108,19 +108,24 @@ vec_bytes SerialPort::readLine()
 {
     vec_bytes result;
 
-    while(true) {
+    bool finished = false;
+    while(!finished) {
         this->read_char(c);
+        // std::cout << int(c) << " ";
         switch(c)
         {
             case '\r':
                 break;
             case '\n':
-                // Конвертируем BIN 2 HEX и возвращаем
-                return result;
+                finished = true;
+                break;
             default:
                 result.push_back(c);
         }
     }
+    // std::cout << std::endl;
+    // Конвертируем BIN 2 HEX и возвращаем
+    return result;
 }
 
 int SerialPort::write_data(vec_bytes buf)

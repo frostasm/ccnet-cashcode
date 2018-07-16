@@ -2,10 +2,11 @@
 #define CCPACKAGE_H
 #define POLYNOMIAL 0x08408
 
-#include <vector>
-#include <string>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "commands.h"
 
 typedef std::vector<unsigned char> vec_bytes;

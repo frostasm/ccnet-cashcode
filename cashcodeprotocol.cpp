@@ -7,21 +7,20 @@
 /*
  * Возвращает наминал принятой/распознаной и отправленной в стек купюры.
  */
-int CashCodeProtocol::CashCodeTable(byte code)
+void CashCodeProtocol::setCashCodeTable(const std::map<uint8_t, int> &cashCodeTable)
 {
-    if(code == 0x00)
-        return 50;
-    else if(code == 0x01)
-        return 100;
-    else if(code == 0x02)
-        return 200;
-    else if(code == 0x03)
-        return 500;
-    else if(code == 0x04)
-        return 1000;
-    else if(code == 0x05)
-        return 5000;
-    return 0;
+    m_cashCodeTable = cashCodeTable;
+}
+
+int CashCodeProtocol::CashReceived() const
+{
+    return m_CashReceived;
+}
+
+int CashCodeProtocol::GetDenominationFromCashCodeTable(byte code)
+{
+    const bool containsCode  = m_cashCodeTable.find(code) != m_cashCodeTable.end();
+    return  containsCode ? m_cashCodeTable[code] : 0;
 }
 
 CashCodeProtocol::CashCodeProtocol() : m_CashReceived(0)
@@ -42,6 +41,8 @@ int CashCodeProtocol::EnableSequence()
         std::cout << "COM Port is not open!" << std::endl;
         return 1;
     }
+    m_CashReceived = 0;
+    result = this->SendCommand(ValidatorCommands::EnableBillTypes, ENABLE_BILL_TYPES_WITH_ESCROW);
     return 0;
 }
 
@@ -54,6 +55,7 @@ int CashCodeProtocol::DisableSequence()
     }
 
     result = this->SendCommand(ValidatorCommands::EnableBillTypes, DISABLE_BILL_TYPES_WITH_ESCROW);
+
     return 0;
 }
 
@@ -98,7 +100,6 @@ void CashCodeProtocol::ValidatorListener()
 
             // IDLING
             if(responseType == PollResponseType::Idling) {
-                std::cout << "ResponseType: PollResponseType::Idling" << std::endl;
                 this->SendCommand(ValidatorCommands::Ack);
                 continue;
             }
@@ -144,8 +145,8 @@ void CashCodeProtocol::ValidatorListener()
                     // Bill stacked 0x81
                     // купюра попала в стек
                     this->SendCommand(ValidatorCommands::Ack);
-                    m_CashReceived += this->CashCodeTable(result[4]);
-                    std::cout << "\nCASH: " << std::dec << this->CashCodeTable(result[4]) << std::endl;
+                    m_CashReceived += this->GetDenominationFromCashCodeTable(result[4]);
+                    std::cout << "\nCASH: " << std::dec << this->GetDenominationFromCashCodeTable(result[4]) << std::endl;
                     print_b("STACKED: ", result);
                 }
                 else if(responseType == PollResponseType::Returning)
@@ -250,8 +251,8 @@ int CashCodeProtocol::PowerUpValidator()
 {
     vec_bytes result;
 
-    if( ! this->m_IsConnected){
-        throw new CashCodeError(0);
+    if(!this->m_IsConnected){
+        return -1;
     }
 
     // Power UP
@@ -275,7 +276,9 @@ int CashCodeProtocol::PowerUpValidator()
 
     // RESET
     result = this->SendCommand(ValidatorCommands::Reset);
-     print_b("RESET: ", result);
+    print_b("RESET: ", result);
+
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
 
     // Если купюроприемник не ответил сигналом ACK
     if(responseType != PollResponseType::Ack){
@@ -438,4 +441,24 @@ void CashCodeProtocol::print_b(std::string msg, vec_bytes data){
     for(auto byte : data)
         std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << (int)byte;
     std::cout << std::endl;
+}
+
+// now does not work
+void CashCodeProtocol::print_bill_table(const vec_bytes &bill_table)
+{
+    std::cout << "BillTable" << std::endl
+              << "table row size:" << bill_table.size();
+
+    const int itemCount = bill_table.size() / 5;
+    for (int i = 0; i < itemCount; ++i) {
+        const int index = i * 5;
+        const int denomination = bill_table[index];
+        std::string countryCode;
+        for (int j = 1; j < 4; ++j) {
+            countryCode += bill_table[index + j];
+        }
+
+        std::cout << i << "denomination:" << denomination << "country:" << countryCode << std::endl;
+    }
+    std::cout << std::flush;
 }

@@ -1,17 +1,18 @@
 #ifndef CASHCODEPROTOCOL_H
 #define CASHCODEPROTOCOL_H
 
+#include <iomanip>
+#include <map>
 #include <string>
 #include <vector>
-#include <iomanip>
-#include <boost/thread.hpp>
 
 #include <boost/chrono.hpp>
+#include <boost/thread.hpp>
 
-#include "commands.h"
-#include "serialport.h"
 #include "cashcodeerrors.h"
 #include "ccpackage.h"
+#include "commands.h"
+#include "serialport.h"
 
 
 class CashCodeProtocol
@@ -29,6 +30,9 @@ private:
     CCPackage Pack;
     boost::thread* m_thread{nullptr};
 
+    int m_CashReceived;
+    std::map<uint8_t, int> m_cashCodeTable;
+
     // Time-out ожидания ответа от считывателя
     const int POLL_TIMEOUT = 200;
 
@@ -40,7 +44,7 @@ private:
     vec_bytes SECURITY_CODE = { 0x00, 0x00, 0x00 };
 
     // Таблица кодов валют
-    int CashCodeTable(byte code);
+    int GetDenominationFromCashCodeTable(byte code);
 
 public:
     CashCodeProtocol();
@@ -48,10 +52,11 @@ public:
     enum class BillRecievedStatus { Accepted, Rejected };
     enum class BillCassetteStatus { Inplace, Removed };
 
+    void SetCashCodeTable(const std::map<uint8_t, int>& cashCodeTable);
+
     bool IsConnected();
 
-    int m_CashReceived;
-
+    int CashReceived() const;
     // Отправка команды купюро приемнику
     vec_bytes SendCommand(ValidatorCommands cmd, vec_bytes Data = {});
 
@@ -88,6 +93,8 @@ public:
     void ValidatorListener();
 
     void print_b(std::string msg, vec_bytes);
+
+    void print_bill_table(const vec_bytes &bill_table);
 };
 
 #endif // CASHCODEPROTOCOL_H
