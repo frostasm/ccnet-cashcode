@@ -19,8 +19,8 @@ typedef boost::shared_ptr<boost::asio::serial_port> serial_port_ptr;
 
 class SerialPort {
 private:
-    serial_port_ptr p_port;
     boost::asio::io_service m_io_service;
+    serial_port_ptr p_port;
     boost::asio::deadline_timer *timer;
 
     size_t timeout;

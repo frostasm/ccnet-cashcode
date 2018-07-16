@@ -66,6 +66,12 @@ void SerialPort::stop()
         this->p_port->cancel();
         this->p_port->close();
     }
+
+    if (this->timer) {
+        this->timer->cancel();
+        delete this->timer;
+    }
+
     this->m_io_service.stop();
     this->m_io_service.reset();
 }
