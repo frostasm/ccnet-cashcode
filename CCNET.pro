@@ -15,17 +15,15 @@ HEADERS += cashcodeprotocol.h \
     commands.h
 
 windows: {
-    INCLUDEPATH += H:\Libs\boost_1_62_0
     LIBS += -lws2_32
-    LIBS += -LH:\Libs\bin \
-            -lboost_system-mgw53-1_62 \
-            -lboost_thread-mgw53-mt-1_62 \
-            -lboost_chrono-mgw53-1_62
+#    LIBS += -LH:\Libs\bin \
+    LIBS += \
+            -lboost_system-mgw53-mt-d-x32-1_67 \
+            -lboost_thread-mgw53-mt-d-x32-1_67 \
+            -lboost_chrono-mgw53-mt-d-x32-1_67
 } else {
     LIBS += \
             -lboost_system \
             -lboost_thread \
             -lboost_chrono
 }
-
-
