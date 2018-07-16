@@ -1,13 +1,14 @@
 #include "cashcodeprotocol.h"
 
 #include "commands.h"
+#include "timingspecifications.h"
 
 #include <stdio.h>
 
 /*
  * Возвращает наминал принятой/распознаной и отправленной в стек купюры.
  */
-void CashCodeProtocol::setCashCodeTable(const std::map<uint8_t, int> &cashCodeTable)
+void CashCodeProtocol::SetCashCodeTable(const std::map<uint8_t, int> &cashCodeTable)
 {
     m_cashCodeTable = cashCodeTable;
 }
@@ -67,7 +68,7 @@ void CashCodeProtocol::ValidatorListener()
         while(true)
         {
             // boost interruption point
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+            boost::this_thread::sleep_for(TimingSpecifications::TPoll);
 
             // POLL
             result = this->SendCommand(ValidatorCommands::Poll);
@@ -188,6 +189,10 @@ vec_bytes CashCodeProtocol::SendCommand(ValidatorCommands cmd, vec_bytes Data)
 
         if(bytes.size() != 0)
             this->ComPort->write_data(bytes);
+
+        // The t-free must be obeyed by the Controller between the end of any ACK or NAK confirmation response and
+        // start of the next command transmission.
+        boost::this_thread::sleep_for(TimingSpecifications::TFree);
     }
     else
     {
@@ -277,15 +282,13 @@ int CashCodeProtocol::PowerUpValidator()
     // RESET
     result = this->SendCommand(ValidatorCommands::Reset);
     print_b("RESET: ", result);
-
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
-
     // Если купюроприемник не ответил сигналом ACK
     if(responseType != PollResponseType::Ack){
         m_LastError = 0x00;
         return m_LastError;
     }
 
+    boost::this_thread::sleep_for(TimingSpecifications::TBusResetMin);
 
     // Опрос купюроприемника процедура инициализации
     result = this->SendCommand(ValidatorCommands::Poll);

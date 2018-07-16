@@ -32,7 +32,7 @@ int main(int /*argc*/, char */*argv*/[])
 
 
         std::this_thread::sleep_for(std::chrono::seconds(10));
-        cout << "Total Cash: " << dec << CCValidator.m_CashReceived << endl;
+        cout << "Total Cash: " << dec << CCValidator.CashReceived() << endl;
 
         CCValidator.StopListening();
         CCValidator.DisableSequence();

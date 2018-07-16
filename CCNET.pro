@@ -12,7 +12,8 @@ HEADERS += cashcodeprotocol.h \
     cashcodeerrors.h \
     serialport.h \
     ccpackage.h \
-    commands.h
+    commands.h \
+    timingspecifications.h
 
 windows: {
     LIBS += -lws2_32

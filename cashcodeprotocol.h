@@ -46,6 +46,9 @@ private:
     // Таблица кодов валют
     int GetDenominationFromCashCodeTable(byte code);
 
+    // Функция прослушка купюро приемника
+    void ValidatorListener();
+
 public:
     CashCodeProtocol();
     ~CashCodeProtocol();
@@ -88,9 +91,6 @@ public:
     // Disable sequence
     // Выключение режима для приема купюр
     int DisableSequence(void);
-
-    // Функция прослушка купюро приемника
-    void ValidatorListener();
 
     void print_b(std::string msg, vec_bytes);
 
