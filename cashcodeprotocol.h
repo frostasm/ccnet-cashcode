@@ -25,9 +25,9 @@ private:
     bool m_IsListening;
     bool m_IsEnableBills;
     bool m_ReturnBill;
-    SerialPort *ComPort;
+    SerialPort *ComPort{nullptr};
     CCPackage Pack;
-    boost::thread* m_thread;
+    boost::thread* m_thread{nullptr};
 
     // Time-out ожидания ответа от считывателя
     const int POLL_TIMEOUT = 200;

@@ -77,62 +77,70 @@ void CashCodeProtocol::ValidatorListener()
 
             // Проверка на ошибки, если были обнаружены ошибки посылаем команду NAK
             if(this->CheckErrors(result)) {
+                std::cout << "CheckErrors: return true" << std::endl;
                 this->SendCommand(ValidatorCommands::Nak);
                 continue;
             }
 
-            const PollResponseType resultCommand = PollResponseType(result[3]);
-            if(resultCommand == PollResponseType::BillValidatorJammed){
+            const PollResponseType responseType = PollResponseType(result[3]);
+
+            if(responseType == PollResponseType::BillValidatorJammed){
                 std::cout << "DROP CASSETTE OUT OF POSITION" << std::endl;
                 continue;
             }
 
             // ACK
-            if(resultCommand == PollResponseType::Ack) {
+            if(responseType == PollResponseType::Ack) {
+                std::cout << "ResponseType: PollResponseType::Ack" << std::endl;
                 this->SendCommand(ValidatorCommands::Poll);
                 continue;
             }
 
             // IDLING
-            if(resultCommand == PollResponseType::Idling) {
+            if(responseType == PollResponseType::Idling) {
+                std::cout << "ResponseType: PollResponseType::Idling" << std::endl;
                 this->SendCommand(ValidatorCommands::Ack);
                 continue;
             }
 
             // Если 4 байт не равен 0х14 (IDLING)
-            if(resultCommand != PollResponseType::Idling)
+            if(responseType != PollResponseType::Idling)
             {
-                if(resultCommand == PollResponseType::Accepting)
+                if(responseType == PollResponseType::Accepting)
                 {
                     // ACCEPTING 0x15
+                    std::cout << "ResponseType: PollResponseType::Accepting" << std::endl;
                     this->SendCommand(ValidatorCommands::Ack);
                 }
-                else if(resultCommand == PollResponseType::Rejecting)
+                else if(responseType == PollResponseType::Rejecting)
                 {
                     // ESCROW POSITION
                     // Если 0x1C (Rejection), купюроприемник скорее всего не распознал купюру
-
+                    std::cout << "ResponseType: PollResponseType::Rejecting" << std::endl;
                     this->SendCommand(ValidatorCommands::Ack);
                 }
-                else if(resultCommand == PollResponseType::EscrowPosition)
+                else if(responseType == PollResponseType::EscrowPosition)
                 {
+                    std::cout << "ResponseType: PollResponseType::EscrowPosition" << std::endl;
+
                     // ESCROW POSITION
                     // Купюра распознана и находится в отсеке хранения
                     this->SendCommand(ValidatorCommands::Ack);
-
 
                     /****** СДЕСЬ В ДАЛЬНЕЙШЕМ БУДЕТ ПРОВЕРКА СОСТОЯНИЯ СЕТИ ******/
 
                     // STACK
                     result = this->SendCommand(ValidatorCommands::Stack);
                 }
-                else if(resultCommand == PollResponseType::Stacking)
+                else if(responseType == PollResponseType::Stacking)
                 {
                     // STACKING 0x17 отправка купюры в стек
+                    std::cout << "ResponseType: PollResponseType::Stacking" << std::endl;
                     this->SendCommand(ValidatorCommands::Ack);
                 }
-                else if(resultCommand == PollResponseType::BillStacked)
+                else if(responseType == PollResponseType::BillStacked)
                 {
+                    std::cout << "ResponseType: PollResponseType::BillStacked" << std::endl;
                     // Bill stacked 0x81
                     // купюра попала в стек
                     this->SendCommand(ValidatorCommands::Ack);
@@ -140,14 +148,16 @@ void CashCodeProtocol::ValidatorListener()
                     std::cout << "\nCASH: " << std::dec << this->CashCodeTable(result[4]) << std::endl;
                     print_b("STACKED: ", result);
                 }
-                else if(resultCommand == PollResponseType::Returning)
+                else if(responseType == PollResponseType::Returning)
                 {
+                    std::cout << "ResponseType: PollResponseType::Returning" << std::endl;
                     // RETURNING
                     // Если четвертый бит 18h, следовательно идет процесс возврата
                     this->SendCommand(ValidatorCommands::Ack);
                 }
-                else if(resultCommand == PollResponseType::BillReturned)
+                else if(responseType == PollResponseType::BillReturned)
                 {
+                    std::cout << "ResponseType: PollResponseType::BillReturned" << std::endl;
                     // BILL RETURNING
                     // Если четвертый бит 82h, следовательно купюра возвращена
                     this->SendCommand(ValidatorCommands::Ack);
@@ -204,6 +214,7 @@ void CashCodeProtocol::StartListening()
 void CashCodeProtocol::StopListening()
 {
     if (m_thread) {
+        m_thread->interrupt();
         m_thread->join();
         delete m_thread;
         m_thread = nullptr;
@@ -252,9 +263,9 @@ int CashCodeProtocol::PowerUpValidator()
         this->SendCommand(ValidatorCommands::Nak);
     }
 
-    const PollResponseType resultCommand = PollResponseType(result[3]);
+    const PollResponseType responseType = PollResponseType(result[3]);
     // Если CashCode вернул в 4 байте 0х19 значит он уже включен
-    if(resultCommand == PollResponseType::UnitDisabled) {
+    if(responseType == PollResponseType::UnitDisabled) {
         std::cout << "Validator ready to work!" << std::endl;
         return 0;
     }
@@ -267,7 +278,7 @@ int CashCodeProtocol::PowerUpValidator()
      print_b("RESET: ", result);
 
     // Если купюроприемник не ответил сигналом ACK
-    if(resultCommand != PollResponseType::Ack){
+    if(responseType != PollResponseType::Ack){
         m_LastError = 0x00;
         return m_LastError;
     }
@@ -301,7 +312,7 @@ int CashCodeProtocol::PowerUpValidator()
     print_b("SET_SECURITY: ", result);
 
     // Если не получили от купюроприемника сигнал ACK
-    if(resultCommand != PollResponseType::Ack){
+    if(responseType != PollResponseType::Ack){
         m_LastError = 0x00;
         return this->m_LastError;
     }
