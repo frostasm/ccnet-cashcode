@@ -3,15 +3,12 @@
 #include "cashcodeprotocol.h"
 
 #include <QScopedPointer>
+#include <QDebug>
+
 
 CashCodeBillValidatorBase::CashCodeBillValidatorBase(QObject *parent) : QObject(parent)
 {
-    connect(this, &CashCodeBillValidatorBase::receptionStarted, this, [this](){ setReceptionRunning(true); });
-    connect(this, &CashCodeBillValidatorBase::receptionStopped, this, [this](){ setReceptionRunning(false); });
-    connect(this, &CashCodeBillValidatorBase::errorOccured, this, [this](){ setReceptionRunning(false); });
-    connect(this, &CashCodeBillValidatorBase::billAccepted, this, [this](int denomination){
-        setReceivedCash(m_cashReceived + denomination);
-    });
+    initConnections();
 }
 
 CashCodeBillValidatorBase::~CashCodeBillValidatorBase()
@@ -20,7 +17,7 @@ CashCodeBillValidatorBase::~CashCodeBillValidatorBase()
 
 int CashCodeBillValidatorBase::receivedCash() const
 {
-    return m_cashReceived;
+    return m_receivedCash;
 }
 
 bool CashCodeBillValidatorBase::isReceptionRunning() const
@@ -49,10 +46,10 @@ void CashCodeBillValidatorBase::setReceptionRunning(bool receptionRunning)
 
 void CashCodeBillValidatorBase::setReceivedCash(int cashReceived)
 {
-    if (m_cashReceived == cashReceived)
+    if (m_receivedCash == cashReceived)
         return;
 
-    m_cashReceived = cashReceived;
+    m_receivedCash = cashReceived;
     emit receivedCashChanged(cashReceived);
 }
 
@@ -64,4 +61,43 @@ void CashCodeBillValidatorBase::setError(const QString &errorMessage)
 void CashCodeBillValidatorBase::clearReceivedCash()
 {
     setReceivedCash(0);
+}
+
+void CashCodeBillValidatorBase::setReceptionRunningToTrue()
+{
+    setReceptionRunning(true);
+}
+
+void CashCodeBillValidatorBase::setReceptionRunningToFalse()
+{
+    setReceptionRunning(false);
+}
+
+void CashCodeBillValidatorBase::updateReceivedCash(int denomination)
+{
+    setReceivedCash(m_receivedCash + denomination);
+}
+
+void CashCodeBillValidatorBase::initConnections()
+{
+    connect(this, &CashCodeBillValidatorBase::receptionStarted,
+            this, &CashCodeBillValidatorBase::setReceptionRunningToTrue);
+    connect(this, &CashCodeBillValidatorBase::receptionStopped,
+            this, &CashCodeBillValidatorBase::setReceptionRunningToFalse);
+    connect(this, &CashCodeBillValidatorBase::errorOccured,
+            this, &CashCodeBillValidatorBase::setReceptionRunningToFalse);
+    connect(this, &CashCodeBillValidatorBase::billAccepted,
+            this, &CashCodeBillValidatorBase::updateReceivedCash);
+}
+
+void CashCodeBillValidatorBase::resetConnections()
+{
+    disconnect(this, &CashCodeBillValidatorBase::receptionStarted,
+               this, &CashCodeBillValidatorBase::setReceptionRunningToTrue);
+    disconnect(this, &CashCodeBillValidatorBase::receptionStopped,
+               this, &CashCodeBillValidatorBase::setReceptionRunningToFalse);
+    disconnect(this, &CashCodeBillValidatorBase::errorOccured,
+               this, &CashCodeBillValidatorBase::setReceptionRunningToFalse);
+    disconnect(this, &CashCodeBillValidatorBase::billAccepted,
+               this, &CashCodeBillValidatorBase::updateReceivedCash);
 }

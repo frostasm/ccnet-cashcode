@@ -4,9 +4,8 @@
 #include "CashCodeBillValidatorBase.h"
 
 #include <QThread>
+#include <functional>
 
-
-class CashCodeBillValidatorWorker;
 
 class CashCodeBillValidatorThreaded : public CashCodeBillValidatorBase
 {
@@ -14,6 +13,8 @@ class CashCodeBillValidatorThreaded : public CashCodeBillValidatorBase
 public:
     CashCodeBillValidatorThreaded(QObject* parent = nullptr);
     ~CashCodeBillValidatorThreaded();
+
+    static void setCashCodeBillValidatorFactory(std::function<CashCodeBillValidatorBase*()> factory);
 
 signals:
     void startReceptionRequested(QPrivateSignal);
@@ -30,7 +31,8 @@ private:
     Q_DISABLE_COPY(CashCodeBillValidatorThreaded)
 
     QThread m_workerThread;
-    CashCodeBillValidatorWorker* m_validator{nullptr};
+    static std::function<CashCodeBillValidatorBase*()> s_factory;
+    CashCodeBillValidatorBase* m_validator{nullptr};
 };
 
 #endif // CASHCODEBILLVALIDATORTHREADED_H

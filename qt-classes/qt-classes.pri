@@ -11,7 +11,8 @@ HEADERS += \
     $$PWD/CashCodeBillValidatorBase.h \
     $$PWD/CashCodeBillValidatorSingleton.h \
     $$PWD/CashCodeBillValidatorThreaded.h \
-    $$PWD/CashCodeBillValidatorWorker.h
+    $$PWD/CashCodeBillValidatorWorker.h \
+    $$PWD/CashCodeBillValidatorTester.h
 
 SOURCES += \
     $$PWD/MainWindow.cpp \
@@ -19,4 +20,5 @@ SOURCES += \
     $$PWD/CashCodeBillValidatorBase.cpp \
     $$PWD/CashCodeBillValidatorSingleton.cpp \
     $$PWD/CashCodeBillValidatorThreaded.cpp \
-    $$PWD/CashCodeBillValidatorWorker.cpp
+    $$PWD/CashCodeBillValidatorWorker.cpp \
+    $$PWD/CashCodeBillValidatorTester.cpp

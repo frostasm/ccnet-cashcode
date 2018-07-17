@@ -5,7 +5,7 @@
 #include <QSharedPointer>
 
 #include <atomic>
-
+#include <functional>
 
 class CashCodeBillValidatorBase : public QObject
 {
@@ -40,8 +40,16 @@ protected slots:
     virtual void setReceptionRunning(bool receptionRunning);
     virtual void clearReceivedCash();
 
+    virtual void setReceptionRunningToTrue();
+    virtual void setReceptionRunningToFalse();
+    virtual void updateReceivedCash(int denomination);
+
+protected:
+    void initConnections();
+    void resetConnections();
+
 private:
-    std::atomic<int> m_cashReceived{0};
+    std::atomic<int> m_receivedCash{0};
     std::atomic<bool> m_receptionRunning{false};
 };
 
