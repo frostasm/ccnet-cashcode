@@ -1,9 +1,7 @@
 TEMPLATE = app
-CONFIG += console c++11
-CONFIG -= app_bundle
-CONFIG -= qt
+CONFIG += c++11
 
-SOURCES += main.cpp \
+SOURCES += \
     cashcodeprotocol.cpp \
     serialport.cpp \
     ccpackage.cpp
@@ -29,3 +27,23 @@ windows: {
             -lboost_thread \
             -lboost_chrono
 }
+
+MAIN_CPP=main.cpp
+QT_CLASSES_PRI=
+
+contains(DEFINES, WITH_QT): {
+    message(Building with Qt)
+    DEFINES += QT_DEPRECATED_WARNINGS
+    QT_CLASSES_PRI=qt-classes/qt-classes.pri
+    MAIN_CPP=
+} else {
+    message(Building without Qt)
+    CONFIG -= qt
+    CONFIG += console
+    CONFIG -= app_bundle
+    QT_CLASSES_PRI=
+}
+
+include($${QT_CLASSES_PRI})
+
+SOURCES += $${MAIN_CPP}
