@@ -4,15 +4,9 @@
 
 #include <QScopedPointer>
 
-CashCodeBillValidator::CashCodeBillValidator(QObject *parent) : QObject(parent)
+CashCodeBillValidator::CashCodeBillValidator(QObject *parent)
+    : CashCodeBillValidatorBase(parent)
 {
-    connect(this, &CashCodeBillValidator::receptionStarted, this, &CashCodeBillValidator::clearReceivedCash);
-    connect(this, &CashCodeBillValidator::receptionStarted, this, [this](){ setReceptionRunning(true); });
-    connect(this, &CashCodeBillValidator::receptionStopped, this, [this](){ setReceptionRunning(false); });
-    connect(this, &CashCodeBillValidator::errorOccured, this, [this](){ setReceptionRunning(false); });
-    connect(this, &CashCodeBillValidator::billAccepted, this, [this](int denomination){
-        setReceivedCash(m_cashReceived + denomination);
-    });
 }
 
 CashCodeBillValidator::~CashCodeBillValidator()
@@ -20,22 +14,13 @@ CashCodeBillValidator::~CashCodeBillValidator()
     stopReception();
 }
 
-int CashCodeBillValidator::receivedCash() const
-{
-    return m_cashReceived;
-}
-
-bool CashCodeBillValidator::isReceptionRunning() const
-{
-    return m_receptionRunning;
-}
-
 void CashCodeBillValidator::startReception()
 {
+    clearReceivedCash();
+
     if (ensureCashCodeProtocolInitialized()) {
         Q_ASSERT(!m_protocol.isNull());
 
-        m_cashReceived = 0;
         const bool enableOk = m_protocol->EnableSequence() == 0;
         if (!enableOk) {
             setError("Can't enable bill validator");
@@ -56,30 +41,6 @@ void CashCodeBillValidator::stopReception()
         m_protocol->StopListening();
         m_protocol->DisableSequence();
     }
-}
-
-void CashCodeBillValidator::setReceptionRunning(bool receptionRunning)
-{
-    if (m_receptionRunning == receptionRunning)
-        return;
-
-    m_receptionRunning = receptionRunning;
-    emit receptionRunningChanged(m_receptionRunning);
-}
-
-void CashCodeBillValidator::setReceivedCash(int cashReceived)
-{
-    if (m_cashReceived == cashReceived)
-        return;
-
-    m_cashReceived = cashReceived;
-    emit receivedCashChanged(cashReceived);
-}
-
-void CashCodeBillValidator::setError(const QString &errorMessage)
-{
-    deleteCashCodeProtocol();
-    emit errorOccured(errorMessage);
 }
 
 void CashCodeBillValidator::billValidatorReceptionStarted()
@@ -105,11 +66,6 @@ void CashCodeBillValidator::billValidatorBillAccepted(int denomination)
 void CashCodeBillValidator::billValidatorBillRejected(int denomination)
 {
     emit billRejected(denomination);
-}
-
-void CashCodeBillValidator::clearReceivedCash()
-{
-    setReceivedCash(0);
 }
 
 bool CashCodeBillValidator::ensureCashCodeProtocolInitialized()
