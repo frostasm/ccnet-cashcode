@@ -5,9 +5,12 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <atomic>
 
 #include <boost/chrono.hpp>
 #include <boost/thread.hpp>
+
+#include "IBillValidatorEventsListener.h"
 
 #include "cashcodeerrors.h"
 #include "ccpackage.h"
@@ -30,8 +33,10 @@ private:
     CCPackage Pack;
     boost::thread* m_thread{nullptr};
 
-    int m_CashReceived;
+    std::atomic<int> m_CashReceived;
     std::map<uint8_t, int> m_cashCodeTable;
+
+    IBillValidatorEventsListener* m_eventsListener{nullptr};
 
     // Time-out ожидания ответа от считывателя
     const int POLL_TIMEOUT = 200;
@@ -50,8 +55,9 @@ private:
     void ValidatorListener();
 
 public:
-    CashCodeProtocol();
+    CashCodeProtocol(IBillValidatorEventsListener* eventsListener = nullptr);
     ~CashCodeProtocol();
+
     enum class BillRecievedStatus { Accepted, Rejected };
     enum class BillCassetteStatus { Inplace, Removed };
 
@@ -91,6 +97,8 @@ public:
     // Disable sequence
     // Выключение режима для приема купюр
     int DisableSequence(void);
+
+    bool isValidatorListening() const;
 
     void print_b(std::string msg, vec_bytes);
 

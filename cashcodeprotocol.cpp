@@ -24,7 +24,9 @@ int CashCodeProtocol::GetDenominationFromCashCodeTable(byte code)
     return  containsCode ? m_cashCodeTable[code] : 0;
 }
 
-CashCodeProtocol::CashCodeProtocol() : m_CashReceived(0)
+CashCodeProtocol::CashCodeProtocol(IBillValidatorEventsListener* eventsListener)
+    : m_CashReceived(0)
+    , m_eventsListener(eventsListener)
 {
     this->ComPort = new SerialPort(200);
 }
@@ -44,6 +46,10 @@ int CashCodeProtocol::EnableSequence()
     }
     m_CashReceived = 0;
     result = this->SendCommand(ValidatorCommands::EnableBillTypes, ENABLE_BILL_TYPES_WITH_ESCROW);
+    if (m_eventsListener) {
+        m_eventsListener->billValidatorReceptionStarted();
+    }
+
     return 0;
 }
 
@@ -56,8 +62,15 @@ int CashCodeProtocol::DisableSequence()
     }
 
     result = this->SendCommand(ValidatorCommands::EnableBillTypes, DISABLE_BILL_TYPES_WITH_ESCROW);
-
+    if (m_eventsListener) {
+        m_eventsListener->billValidatorReceptionStopped();
+    }
     return 0;
+}
+
+bool CashCodeProtocol::isValidatorListening() const
+{
+    return m_thread != nullptr;
 }
 
 void CashCodeProtocol::ValidatorListener()
@@ -146,8 +159,12 @@ void CashCodeProtocol::ValidatorListener()
                     // Bill stacked 0x81
                     // купюра попала в стек
                     this->SendCommand(ValidatorCommands::Ack);
-                    m_CashReceived += this->GetDenominationFromCashCodeTable(result[4]);
-                    std::cout << "\nCASH: " << std::dec << this->GetDenominationFromCashCodeTable(result[4]) << std::endl;
+                    const int denomanation = this->GetDenominationFromCashCodeTable(result[4]);
+                    if (m_eventsListener) {
+                        m_eventsListener->billValidatorBillAccepted(denomanation);
+                    }
+                    m_CashReceived += denomanation;
+                    std::cout << "\nCASH: " << std::dec << denomanation << std::endl;
                     print_b("STACKED: ", result);
                 }
                 else if(responseType == PollResponseType::Returning)
@@ -163,6 +180,10 @@ void CashCodeProtocol::ValidatorListener()
                     // BILL RETURNING
                     // Если четвертый бит 82h, следовательно купюра возвращена
                     this->SendCommand(ValidatorCommands::Ack);
+                    const int denomanation = this->GetDenominationFromCashCodeTable(result[4]);
+                    if (m_eventsListener) {
+                        m_eventsListener->billValidatorBillRejected(denomanation);
+                    }
                 }
             }
         }
@@ -237,16 +258,23 @@ int CashCodeProtocol::ConnectValidator()
         if(this->ComPort->start("COM1", 9600)) {
             this->m_IsConnected = true;
             std::cout << "COM CONNECTED!" << std::endl;
+            return 0;
         }
         return 1;
     }
-    catch(std::exception e)
+    catch (boost::system::system_error& be)
+    {
+        this->m_IsConnected = false;
+        std::cerr << "Boost error: " << boost::diagnostic_information(be);
+    }
+    catch(std::exception& e)
     {
         this->m_IsConnected = false;
         std::cout << "Error: " << e.what() << std::endl;
     }
 
-    return 0;
+
+    return 1;
 }
 
 /*

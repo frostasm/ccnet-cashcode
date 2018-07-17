@@ -13,7 +13,8 @@ HEADERS += cashcodeprotocol.h \
     serialport.h \
     ccpackage.h \
     commands.h \
-    timingspecifications.h
+    timingspecifications.h \
+    IBillValidatorEventsListener.h
 
 windows: {
     LIBS += -lws2_32

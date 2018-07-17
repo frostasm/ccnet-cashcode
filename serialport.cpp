@@ -48,6 +48,7 @@ bool SerialPort::start(const char *com_port_name, int baud_rate)
     {
         std::cout << "Error: this->_port->open() failed. Com port name="
                   << com_port_name << ", Error Code=" << error_code.message().c_str() << std::endl;
+        return false;
     }
 
     // Set options
@@ -61,7 +62,7 @@ bool SerialPort::start(const char *com_port_name, int baud_rate)
 
 void SerialPort::stop()
 {
-    if(this->p_port)
+    if(this->p_port && this->p_port->is_open())
     {
         this->p_port->cancel();
         this->p_port->close();
