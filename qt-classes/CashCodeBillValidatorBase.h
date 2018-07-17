@@ -31,8 +31,8 @@ signals:
     void receptionRunningChanged(bool receptionRunning);
 
 public slots:
-    virtual void startReception() = 0;
-    virtual void stopReception() = 0;
+    virtual void startReception();
+    virtual void stopReception();
 
 protected slots:
     virtual void setReceivedCash(int receivedCash);

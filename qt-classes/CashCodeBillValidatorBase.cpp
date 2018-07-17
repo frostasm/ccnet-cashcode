@@ -28,6 +28,16 @@ bool CashCodeBillValidatorBase::isReceptionRunning() const
     return m_receptionRunning;
 }
 
+void CashCodeBillValidatorBase::startReception()
+{
+    Q_ASSERT_X(false, "startReception", "You need to override this method in child classes");
+}
+
+void CashCodeBillValidatorBase::stopReception()
+{
+    Q_ASSERT_X(false, "stopReception", "You need to override this method in child classes");
+}
+
 void CashCodeBillValidatorBase::setReceptionRunning(bool receptionRunning)
 {
     if (m_receptionRunning == receptionRunning)

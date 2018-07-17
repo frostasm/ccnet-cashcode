@@ -9,10 +9,12 @@ FORMS += \
 HEADERS += \
     $$PWD/MainWindow.h \
     $$PWD/CashCodeBillValidator.h \
-    $$PWD/CashCodeBillValidatorBase.h
+    $$PWD/CashCodeBillValidatorBase.h \
+    $$PWD/CashCodeBillValidatorSingleton.h
 
 SOURCES += \
     $$PWD/MainWindow.cpp \
     $$PWD/CashCodeBillValidator.cpp \
     $$PWD/qt-main.cpp \
-    $$PWD/CashCodeBillValidatorBase.cpp
+    $$PWD/CashCodeBillValidatorBase.cpp \
+    $$PWD/CashCodeBillValidatorSingleton.cpp

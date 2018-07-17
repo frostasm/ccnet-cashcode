@@ -22,8 +22,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-
-    CashCodeBillValidator* m_billValidator{nullptr};
 };
 
 #endif // MAINWINDOW_H
