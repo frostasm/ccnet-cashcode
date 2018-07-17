@@ -1,20 +1,21 @@
-#include "CashCodeBillValidator.h"
+#include "CashCodeBillValidatorWorker.h"
 
 #include "cashcodeprotocol.h"
 
 #include <QScopedPointer>
 
-CashCodeBillValidator::CashCodeBillValidator(QObject *parent)
+
+CashCodeBillValidatorWorker::CashCodeBillValidatorWorker(QObject *parent)
     : CashCodeBillValidatorBase(parent)
 {
 }
 
-CashCodeBillValidator::~CashCodeBillValidator()
+CashCodeBillValidatorWorker::~CashCodeBillValidatorWorker()
 {
     stopReception();
 }
 
-void CashCodeBillValidator::startReception()
+void CashCodeBillValidatorWorker::startReception()
 {
     clearReceivedCash();
 
@@ -31,7 +32,7 @@ void CashCodeBillValidator::startReception()
     }
 }
 
-void CashCodeBillValidator::stopReception()
+void CashCodeBillValidatorWorker::stopReception()
 {
     if (!m_protocol) {
         return;
@@ -43,32 +44,32 @@ void CashCodeBillValidator::stopReception()
     }
 }
 
-void CashCodeBillValidator::billValidatorReceptionStarted()
+void CashCodeBillValidatorWorker::billValidatorReceptionStarted()
 {
     emit receptionStarted();
 }
 
-void CashCodeBillValidator::billValidatorReceptionStopped()
+void CashCodeBillValidatorWorker::billValidatorReceptionStopped()
 {
     emit receptionStopped();
 }
 
-void CashCodeBillValidator::billValidatorErrorOccured(const std::string &error)
+void CashCodeBillValidatorWorker::billValidatorErrorOccured(const std::string &error)
 {
     setError(QString::fromStdString(error));
 }
 
-void CashCodeBillValidator::billValidatorBillAccepted(int denomination)
+void CashCodeBillValidatorWorker::billValidatorBillAccepted(int denomination)
 {
     emit billAccepted(denomination);
 }
 
-void CashCodeBillValidator::billValidatorBillRejected(int denomination)
+void CashCodeBillValidatorWorker::billValidatorBillRejected(int denomination)
 {
     emit billRejected(denomination);
 }
 
-bool CashCodeBillValidator::ensureCashCodeProtocolInitialized()
+bool CashCodeBillValidatorWorker::ensureCashCodeProtocolInitialized()
 {
     if (m_protocol) {
         return true;
@@ -104,7 +105,7 @@ bool CashCodeBillValidator::ensureCashCodeProtocolInitialized()
     return true;
 }
 
-void CashCodeBillValidator::deleteCashCodeProtocol()
+void CashCodeBillValidatorWorker::deleteCashCodeProtocol()
 {
     if (m_protocol) {
         m_protocol.clear();

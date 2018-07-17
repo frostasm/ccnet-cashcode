@@ -1,5 +1,5 @@
-#ifndef CASHCODEBILLVALIDATOR_H
-#define CASHCODEBILLVALIDATOR_H
+#ifndef CASHCODEBILLVALIDATORWORKER_H
+#define CASHCODEBILLVALIDATORWORKER_H
 
 #include "CashCodeBillValidatorBase.h"
 
@@ -10,12 +10,12 @@
 
 class CashCodeProtocol;
 
-class CashCodeBillValidator : public CashCodeBillValidatorBase, public IBillValidatorEventsListener
+class CashCodeBillValidatorWorker : public CashCodeBillValidatorBase, public IBillValidatorEventsListener
 {
     Q_OBJECT
 public:
-    explicit CashCodeBillValidator(QObject *parent = nullptr);
-    virtual ~CashCodeBillValidator();
+    explicit CashCodeBillValidatorWorker(QObject *parent = nullptr);
+    virtual ~CashCodeBillValidatorWorker();
 
 public: // IBillValidatorEventsListener
     virtual void billValidatorReceptionStarted();

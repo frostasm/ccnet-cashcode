@@ -7,7 +7,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class CashCodeBillValidator;
+class CashCodeBillValidatorWorker;
 
 class MainWindow : public QMainWindow
 {
